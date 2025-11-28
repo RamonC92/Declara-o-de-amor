@@ -5,14 +5,14 @@
 <title>Controle de Dívidas para o casamento</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-  :root{--bg:#fff6f8;--card:#ffffff;--accent:#b047e1;--muted:#7b6f72;--accent-2:#f7d6e0}
+  :root{--bg:#f0e7e7;--card:#d8a2c3;--accent:#b047e1;--muted:#f7f7f7;--accent-2:#f7d6e0}
   body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; background:linear-gradient(180deg,var(--bg),#fff);margin:0;padding:22px;color:#2b2b2b}
   .card{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 8px 24px rgba(16,24,40,0.06);max-width:1200px;margin:0 auto;border-top:6px solid var(--accent-2);position:relative}
   h1{font-family: 'Georgia', serif;font-size:22px;margin:0 0 12px;color:var(--accent)}
   .title-deco{display:flex;align-items:center;gap:10px}
   .heart{font-size:20px;color:var(--accent)}
   table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{border:1px solid #f1e7eb;padding:10px;text-align:left;font-size:14px;vertical-align:middle}
+  th,td{border:1px solid #b66e8b;padding:10px;text-align:left;font-size:14px;vertical-align:middle}
   input[type="text"], input[type="date"], select{width:100%;box-sizing:border-box;padding:8px;border-radius:6px;border:1px solid #efe0e6}
   input[type="text"].wide{width:400px}
   button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
@@ -25,6 +25,10 @@
   .card:before{left:-10px;top:-10px;background-image:radial-gradient(circle at 20% 20%, #f9e6ec 10%, transparent 11%), radial-gradient(circle at 80% 80%, #fdeef4 10%, transparent 11%)}
   .card:after{right:-10px;bottom:-10px;background-image:radial-gradient(circle at 30% 30%, #f9e6ec 10%, transparent 11%), radial-gradient(circle at 70% 70%, #fdeef4 10%, transparent 11%)}
   @media (max-width:900px){ input[type="text"].wide{width:100%} table{font-size:13px} }
+  /* small helpers */
+  .right{text-align:right}
+  .mutedSmall{color:var(--muted);font-size:13px}
+  input[type="file"]{display:none}
 </style>
 </head>
 <body>
@@ -34,19 +38,29 @@
       <h1>Controle de Dívidas para o casamento</h1>
     </div>
 
-    <div style="text-align:right;margin-top:6px;margin-bottom:6px">
-      <label style="margin-right:8px;color:var(--muted)">Valor Obtido Total (R$):</label>
-      <input id="globalObtained" type="text" step="0.01" style="width:160px;display:inline-block">
-    </div>
+    <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="controls" style="align-items:center">
+        <button id="add">+ Adicionar item</button>
+        <button id="clear" class="ghost">Limpar</button>
 
-    <div class="controls">
-      <button id="add">+ Adicionar item</button>
-      <button id="clear" class="ghost">Limpar</button>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-        <label class="muted">Filtrar até:</label>
-        <input id="filterEnd" type="date">
-        <button id="applyFilter" class="ghost">Aplicar</button>
-        <button id="clearFilter" class="ghost">Limpar filtro</button>
+        <!-- Export / Import buttons -->
+        <button id="exportBtn" class="ghost" style="background:transparent;color:var(--accent);border:1px solid rgba(11,118,255,0.08)">📤 Exportar</button>
+        <label for="importFile" class="ghost" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(11,118,255,0.08);cursor:pointer;background:transparent;color:var(--accent)">📥 Importar</label>
+        <input id="importFile" type="file" accept="application/json">
+      </div>
+
+      <div style="text-align:right;">
+        <div style="margin-bottom:6px">
+          <label style="margin-right:8px;color:var(--muted)">Valor Obtido Total (R$):</label>
+          <input id="globalObtained" type="text" step="0.01" style="width:160px;display:inline-block">
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
+          <label class="muted">Filtrar até:</label>
+          <input id="filterEnd" type="date">
+          <button id="applyFilter" class="ghost">Aplicar</button>
+          <button id="clearFilter" class="ghost">Limpar filtro</button>
+        </div>
       </div>
     </div>
 
@@ -69,201 +83,258 @@
       <tfoot>
         <tr>
           <td class="muted">Totais</td>
-          <td style="text-align:right;font-weight:600" id="totalAll">R$ 0,00</td>
+          <td class="right" style="font-weight:600" id="totalAll">R$ 0,00</td>
           <td></td>
           <td></td>
-          <td style="text-align:right;font-weight:600" id="totalParcels">R$ 0,00</td>
+          <td class="right" style="font-weight:600" id="totalParcels">R$ 0,00</td>
           <td colspan="2" class="muted right" id="infoFilter">(sem filtro)</td>
-          <td style="text-align:right;font-weight:600" id="totalRemaining">R$ 0,00</td>
-          <td style="text-align:right" id="totalStatusCell"></td>
+          <td class="right" style="font-weight:600" id="totalRemaining">R$ 0,00</td>
+          <td></td>
           <td></td>
         </tr>
       </tfoot>
     </table>
 
-    <div style="margin-top:12px;color:var(--muted);font-size:13px">Explicação: o campo "Valor Obtido Total" (canto superior direito) subtrai do total geral. Parcelas só contam se o vencimento estiver dentro do período filtrado.</div>
+    <div style="margin-top:12px;color:var(--muted);font-size:13px">Explicação: o campo "Valor Obtido Total" subtrai do total geral. Parcelas só contam se o vencimento estiver dentro do período filtrado.</div>
   </div>
 
 <script>
-  const tbody = document.querySelector('#sheet tbody')
-  const addBtn = document.getElementById('add')
-  const clearBtn = document.getElementById('clear')
-  const filterEnd = document.getElementById('filterEnd')
-  const applyFilterBtn = document.getElementById('applyFilter')
-  const clearFilterBtn = document.getElementById('clearFilter')
-  const totalAllEl = document.getElementById('totalAll')
-  const totalParcelsEl = document.getElementById('totalParcels')
-  const totalRemainingEl = document.getElementById('totalRemaining')
-  const infoFilterEl = document.getElementById('infoFilter')
+/* ----- Core app (preserve original behavior) ----- */
+const tbody = document.querySelector('#sheet tbody')
+const addBtn = document.getElementById('add')
+const clearBtn = document.getElementById('clear')
+const exportBtn = document.getElementById('exportBtn')
+const importFile = document.getElementById('importFile')
+const filterEnd = document.getElementById('filterEnd')
+const applyFilterBtn = document.getElementById('applyFilter')
+const clearFilterBtn = document.getElementById('clearFilter')
+const totalAllEl = document.getElementById('totalAll')
+const totalParcelsEl = document.getElementById('totalParcels')
+const totalRemainingEl = document.getElementById('totalRemaining')
+const infoFilterEl = document.getElementById('infoFilter')
 
-  let rows = [ {item:'Ex: Geladeira grande (descrição ampla)', amount:'', parcelado:false, qtd:1, parcelValue:'', start:'', end:''} ]
-  let filterDate = null
+let rows = [ {item:'Ex: Geladeira grande (descrição ampla)', amount:'', parcelado:false, qtd:1, parcelValue:'', start:'', end:''} ]
+let filterDate = null
+const STORAGE_KEY = 'controleDividasCasamento' // single key used everywhere
 
-  function render(){
-    tbody.innerHTML = ''
-    rows.forEach((r,i)=>{
-      const tr = document.createElement('tr')
-      tr.innerHTML = `
-        <td><input type="text" class="wide" value="${escapeHtml(r.item||'')}" data-col="item" data-i="${i}"></td>
-        <td style="text-align:right; min-width:150px; white-space:nowrap"><input type="text" value="${r.amount||''}" data-col="amount" data-i="${i}"></td>
-        <td style="text-align:center"><select data-col="parcelado" data-i="${i}"><option value="false" ${!r.parcelado?'selected':''}>Não</option><option value="true" ${r.parcelado?'selected':''}>Sim</option></select></td>
-        <td><input type="text" value="${r.qtd||1}" data-col="qtd" data-i="${i}"></td>
-        <td style="text-align:right; min-width:150px; white-space:nowrap"><input type="text" value="${r.parcelValue||''}" data-col="parcelValue" data-i="${i}" readonly></td>
-        <td><input type="date" value="${r.start||''}" data-col="start" data-i="${i}"></td>
-        <td><input type="date" value="${r.end||''}" data-col="end" data-i="${i}"></td>
-        <td style="text-align:right;font-weight:600" data-remaining data-i="${i}">R$ 0,00</td>
-        <td class="muted" data-status data-i="${i}"></td>
-        <td><button data-action="del" data-i="${i}" class="ghost">🗑</button></td>
-      `
-      tbody.appendChild(tr)
-    })
-    attachListeners()
-    updateTotals()
+function escapeHtml(text){ return (text||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function render(){
+  tbody.innerHTML = ''
+  rows.forEach((r,i)=>{
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td><input type="text" class="wide" value="${escapeHtml(r.item||'')}" data-col="item" data-i="${i}"></td>
+      <td style="text-align:right; min-width:150px; white-space:nowrap"><input type="text" value="${r.amount||''}" data-col="amount" data-i="${i}"></td>
+      <td style="text-align:center"><select data-col="parcelado" data-i="${i}"><option value="false" ${!r.parcelado?'selected':''}>Não</option><option value="true" ${r.parcelado?'selected':''}>Sim</option></select></td>
+      <td><input type="text" value="${r.qtd||1}" data-col="qtd" data-i="${i}"></td>
+      <td style="text-align:right; min-width:150px; white-space:nowrap"><input type="text" value="${r.parcelValue||''}" data-col="parcelValue" data-i="${i}" readonly></td>
+      <td><input type="date" value="${r.start||''}" data-col="start" data-i="${i}"></td>
+      <td><input type="date" value="${r.end||''}" data-col="end" data-i="${i}"></td>
+      <td style="text-align:right;font-weight:600" data-remaining data-i="${i}">R$ 0,00</td>
+      <td class="muted" data-status data-i="${i}"></td>
+      <td><button data-action="del" data-i="${i}" class="ghost">🗑</button></td>
+    `
+    tbody.appendChild(tr)
+  })
+  attachListeners()
+  updateTotals()
+}
+
+/* attach handlers - onblur so user can type multiple digits without rerender interrupting */
+function attachListeners(){
+  tbody.querySelectorAll('input, select').forEach(inp=> inp.onblur = onEdit)
+  tbody.querySelectorAll('button[data-action="del"]').forEach(btn=> btn.onclick = ()=>{
+    rows.splice(Number(btn.dataset.i),1); salvarAutomaticamente(); render()
+  })
+}
+
+/* when user finishes editing a cell (onblur) */
+function onEdit(e){
+  const el = e.target
+  const i = Number(el.dataset.i)
+  const col = el.dataset.col
+  let val = el.value
+  if(col === 'parcelado') val = (val === 'true')
+  rows[i][col] = val
+  // auto-calc parcelValue if amount or qtd changed
+  const total = parseFloat((rows[i].amount||'').toString().replace(',','.')) || 0
+  const qtd = parseInt(rows[i].qtd) || 0
+  rows[i].parcelValue = (qtd>0) ? (total / qtd).toFixed(2) : ''
+  salvarAutomaticamente()
+  render()
+}
+
+/* date helpers */
+function parseDate(s){ if(!s) return null; const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : d }
+function addMonths(date, n){ const d = new Date(date); d.setMonth(d.getMonth()+n); return d }
+
+/* compute how many installments occurred up to upToDate */
+function computeRowParcelInfo(row, upToDate){
+  const qtd = parseInt(row.qtd) || 0
+  const total = parseFloat((row.amount||'').toString().replace(',','.')) || 0
+  const parcelValue = qtd>0 ? total / qtd : total
+  if(!row.parcelado || qtd <= 0) return {installmentsOccurred: 0, parcelValue, sumUntil: total}
+  const start = parseDate(row.start)
+  if(!start) return {installmentsOccurred:0, parcelValue, sumUntil:0}
+  const up = upToDate || new Date()
+  let occurred = 0
+  for(let k=0;k<qtd;k++){
+    const instDate = addMonths(start, k)
+    if(instDate <= up) occurred++
   }
+  const sumUntil = occurred * parcelValue
+  return {installmentsOccurred: occurred, parcelValue, sumUntil}
+}
 
-  function escapeHtml(text){ return (text||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+/* totals & display */
+function updateTotals(){
+  const upTo = filterDate || (filterEnd.value ? parseDate(filterEnd.value) : null) || new Date()
+  let totalAll = 0
+  let totalParcelsUntil = 0
+  let totalRemainingBeforeObtained = 0
 
-  function attachListeners(){
-    // ⚡ Mudança importante: onblur permite digitar valores longos
-    tbody.querySelectorAll('input, select').forEach(inp=> inp.onblur = onEdit)
-    tbody.querySelectorAll('button[data-action="del"]').forEach(btn=> btn.onclick = ()=>{ rows.splice(Number(btn.dataset.i),1); render() })
-  }
+  tbody.querySelectorAll('tr').forEach((tr, idx)=>{
+    const row = rows[idx]
+    const totalVal = parseFloat((row.amount||'').toString().replace(',','.')) || 0
+    totalAll += totalVal
+    totalRemainingBeforeObtained += totalVal
 
-  function onEdit(e){
-    const el = e.target
-    const i = Number(el.dataset.i)
-    const col = el.dataset.col
-    let val = el.value
-    if(col === 'parcelado') val = (val === 'true')
-    rows[i][col] = val
-    // auto-calcula valor da parcela
-    const total = parseFloat((rows[i].amount||'').toString().replace(',','.')) || 0
-    const qtd = parseInt(rows[i].qtd) || 0
-    rows[i].parcelValue = (qtd>0) ? (total / qtd).toFixed(2) : ''
-    render()
-  }
-
-  function parseDate(s){ if(!s) return null; const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : d }
-  function addMonths(date, n){ const d = new Date(date); d.setMonth(d.getMonth()+n); return d }
-
-  function computeRowParcelInfo(row, upToDate){
-    const qtd = parseInt(row.qtd) || 0
-    const total = parseFloat((row.amount||'').toString().replace(',','.')) || 0
-    const parcelValue = qtd>0 ? total / qtd : total
-    if(!row.parcelado || qtd <= 0) return {installmentsOccurred: 0, parcelValue, sumUntil: total}
-    const start = parseDate(row.start)
-    if(!start) return {installmentsOccurred:0, parcelValue, sumUntil:0}
-    const up = upToDate || new Date()
-    let occurred = 0
-    for(let k=0;k<qtd;k++){
-      const instDate = addMonths(start, k)
-      if(instDate <= up) occurred++
-    }
-    const sumUntil = occurred * parcelValue
-    return {installmentsOccurred: occurred, parcelValue, sumUntil}
-  }
-
-  function updateTotals(){
-    const upTo = filterDate || (filterEnd.value ? parseDate(filterEnd.value) : null) || new Date()
-    let totalAll = 0
-    let totalParcelsUntil = 0
-    let totalRemainingBeforeObtained = 0
-
-    tbody.querySelectorAll('tr').forEach((tr, idx)=>{
-      const row = rows[idx]
-      const totalVal = parseFloat((row.amount||'').toString().replace(',','.')) || 0
-      totalAll += totalVal
-      totalRemainingBeforeObtained += totalVal
-
-      const info = computeRowParcelInfo(row, upTo)
-      if(row.parcelado){
-        totalParcelsUntil += info.sumUntil
-      } else {
-        const start = parseDate(row.start)
-        if(!start || start <= upTo) totalParcelsUntil += totalVal
-      }
-
-      const remainingCell = tr.querySelector('[data-remaining]')
-      if(remainingCell) remainingCell.textContent = 'R$ ' + totalVal.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
-
-      const statusCell = tr.querySelector('[data-status]')
-      const end = parseDate(row.end)
-      if(end && end < new Date()) statusCell.textContent = 'Vencida'
-      else if(row.parcelado) statusCell.textContent = 'Parcelada'
-      else statusCell.textContent = 'À vista'
-    })
-
-    const globalObt = parseFloat((document.getElementById('globalObtained').value||'').toString().replace(',','.'))||0
-    const finalRemaining = totalRemainingBeforeObtained - globalObt
-
-    totalAllEl.textContent = 'R$ ' + totalAll.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
-    totalParcelsEl.textContent = 'R$ ' + totalParcelsUntil.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
-    document.getElementById('totalStatusCell').textContent = ''
-
-    totalRemainingEl.textContent = 'R$ ' + Math.abs(finalRemaining).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
-    totalRemainingEl.style.color = finalRemaining >= 0 ? 'green' : 'red'
-
-    if(filterDate || filterEnd.value){
-      const up = filterDate || (filterEnd.value ? parseDate(filterEnd.value) : null)
-      infoFilterEl.textContent = up ? `Somando parcelas até: ${up.toISOString().slice(0,10)}` : '(sem filtro)'
+    const info = computeRowParcelInfo(row, upTo)
+    if(row.parcelado){
+      totalParcelsUntil += info.sumUntil
     } else {
-      infoFilterEl.textContent = '(sem filtro)'
+      const start = parseDate(row.start)
+      if(!start || start <= upTo) totalParcelsUntil += totalVal
     }
-  }
 
-  addBtn.onclick = ()=>{ rows.push({item:'', amount:'', parcelado:false, qtd:1, parcelValue:'', start:'', end:''}); render(); }
-  clearBtn.onclick = ()=>{ if(!confirm('Limpar todas as linhas?')) return; rows=[{item:'', amount:'', parcelado:false, qtd:1, parcelValue:'', start:'', end:''}]; render(); }
+    const remainingCell = tr.querySelector('[data-remaining]')
+    if(remainingCell) remainingCell.textContent = 'R$ ' + totalVal.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
 
-  applyFilterBtn.onclick = ()=>{ if(!filterEnd.value){ alert('Escolha uma data para filtrar até (campo Filtrar até).'); return } filterDate = parseDate(filterEnd.value); updateTotals(); }
-  clearFilterBtn.onclick = ()=>{ filterDate = null; filterEnd.value=''; updateTotals(); }
-
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter'){
-      const el = document.activeElement
-      if(el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA')){
-        e.preventDefault()
-        addBtn.click()
-      }
-    }
+    const statusCell = tr.querySelector('[data-status]')
+    const end = parseDate(row.end)
+    if(end && end < new Date()) statusCell.textContent = 'Vencida'
+    else if(row.parcelado) statusCell.textContent = 'Parcelada'
+    else statusCell.textContent = 'À vista'
   })
 
-  render()
-  document.getElementById('globalObtained').oninput = updateTotals
-  // 🔹 Salvar automaticamente as informações
-function salvarAutomaticamente() {
-    const dados = {
-        rows,
-        filterDate,
-        globalObtained: document.getElementById('globalObtained').value,
-        filterEnd: filterEnd.value
-    };
-    localStorage.setItem("controleDividasCasamento", JSON.stringify(dados));
+  const globalObt = parseFloat((document.getElementById('globalObtained').value||'').toString().replace(',','.'))||0
+  const finalRemaining = totalRemainingBeforeObtained - globalObt
+
+  totalAllEl.textContent = 'R$ ' + totalAll.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
+  totalParcelsEl.textContent = 'R$ ' + totalParcelsUntil.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
+
+  totalRemainingEl.textContent = 'R$ ' + Math.abs(finalRemaining).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})
+  totalRemainingEl.style.color = finalRemaining >= 0 ? 'green' : 'red'
+
+  if(filterDate || filterEnd.value){
+    const up = filterDate || (filterEnd.value ? parseDate(filterEnd.value) : null)
+    infoFilterEl.textContent = up ? `Somando parcelas até: ${up.toISOString().slice(0,10)}` : '(sem filtro)'
+  } else {
+    infoFilterEl.textContent = '(sem filtro)'
+  }
 }
 
-// 🔹 Restaurar ao carregar o site
-function restaurarDados() {
-    const dadosSalvos = localStorage.getItem("controleDividasCasamento");
-    if (dadosSalvos) {
-        try {
-            const dados = JSON.parse(dadosSalvos);
-            rows = dados.rows || rows;
-            filterDate = dados.filterDate || null;
-            if (dados.globalObtained) document.getElementById('globalObtained').value = dados.globalObtained;
-            if (dados.filterEnd) filterEnd.value = dados.filterEnd;
-            render();
-        } catch(e) {
-            console.warn("Erro ao restaurar dados salvos:", e);
-        }
-    } else {
-        render();
+/* add / clear handlers */
+addBtn.onclick = ()=>{ rows.push({item:'', amount:'', parcelado:false, qtd:1, parcelValue:'', start:'', end:''}); salvarAutomaticamente(); render(); }
+clearBtn.onclick = ()=>{ if(!confirm('Limpar todas as linhas?')) return; rows=[{item:'', amount:'', parcelado:false, qtd:1, parcelValue:'', start:'', end:''}]; salvarAutomaticamente(); render(); }
+
+/* filter buttons */
+applyFilterBtn.onclick = ()=>{ if(!filterEnd.value){ alert('Escolha uma data para filtrar até (campo Filtrar até).'); return } filterDate = parseDate(filterEnd.value); updateTotals(); }
+clearFilterBtn.onclick = ()=>{ filterDate = null; filterEnd.value=''; updateTotals(); }
+
+/* allow Enter to add line (keeps previous UX) */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    const el = document.activeElement
+    if(el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA')){
+      e.preventDefault()
+      addBtn.click()
     }
+  }
+})
+
+/* globalObtained changes update totals live (no re-render) */
+document.getElementById('globalObtained').oninput = ()=>{ salvarAutomaticamente(); updateTotals(); }
+
+/* ---------- Persistence: localStorage auto save + restore ---------- */
+function salvarAutomaticamente() {
+  const dados = {
+    rows,
+    filterDate,
+    globalObtained: document.getElementById('globalObtained').value || '',
+    filterEnd: filterEnd.value || ''
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+  } catch(e){
+    console.warn("Erro salvando localStorage:", e)
+  }
 }
 
-// 🚀 Ativar salvamento automático sem interferir no uso
-window.onload = restaurarDados;
-document.addEventListener("input", salvarAutomaticamente);
-document.addEventListener("blur", salvarAutomaticamente, true);
+function restaurarDados() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if(!raw){ render(); return }
+    const d = JSON.parse(raw)
+    if(d.rows) rows = d.rows
+    filterDate = d.filterDate || null
+    if(d.globalObtained) document.getElementById('globalObtained').value = d.globalObtained
+    if(d.filterEnd) filterEnd.value = d.filterEnd
+  } catch(e){
+    console.warn("Erro restaurando dados:", e)
+  }
+  render()
+}
 
+/* call restore on load */
+window.addEventListener('load', ()=>{
+  restaurarDados()
+})
+
+/* also save on blur anywhere to be safe (user might not blur cell but other events) */
+document.addEventListener('blur', salvarAutomaticamente, true)
+document.addEventListener('input', ()=>{ /* do not rerender here */ salvarAutomaticamente() }, true)
+
+/* ---------- Export / Import (download/upload JSON) ---------- */
+exportBtn.onclick = ()=> {
+  try {
+    const dados = localStorage.getItem(STORAGE_KEY) || JSON.stringify({rows})
+    const blob = new Blob([dados], {type: "application/json"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "controle_dividas_casamento.json";
+    link.click();
+  } catch(e){
+    alert("Erro ao exportar: " + e.message)
+  }
+}
+
+importFile.addEventListener('change', (ev)=>{
+  const file = ev.target.files && ev.target.files[0]
+  if(!file) return
+  const reader = new FileReader()
+  reader.onload = function(evt){
+    try{
+      const parsed = JSON.parse(evt.target.result)
+      // write into localStorage and reload from it to keep single code path
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed))
+      restaurarDados()
+      alert("Dados importados com sucesso.")
+    } catch(err){
+      alert("Erro ao carregar arquivo: formato inválido.")
+    }
+  }
+  reader.readAsText(file)
+})
+
+/* expose helpers to console for debugging if needed */
+window._APP = { rows, salvarAutomaticamente, restaurarDados, render }
+
+/* initial render if no load event fired earlier */
+if(document.readyState === 'complete' || document.readyState === 'interactive'){
+  // restaurarDados already scheduled on load; safe to call nothing here
+}
 </script>
 </body>
 </html>
